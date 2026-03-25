@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Evaluation Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 Car Evaluation Classifier</h1>
+            <p>Insira os parâmetros do veículo para obter uma avaliação</p>
+        </header>
+
+        <main>
+            <div class="form-section">
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label for="buying">Preço de Compra:</label>
+                        <select id="buying" name="buying" required>
+                            <option value="">Selecione...</option>
+                            <option value="vhigh">Muito Alto</option>
+                            <option value="high">Alto</option>
+                            <option value="med">Médio</option>
+                            <option value="low">Baixo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maint">Preço de Manutenção:</label>
+                        <select id="maint" name="maint" required>
+                            <option value="">Selecione...</option>
+                            <option value="vhigh">Muito Alto</option>
+                            <option value="high">Alto</option>
+                            <option value="med">Médio</option>
+                            <option value="low">Baixo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doors">Número de Portas:</label>
+                        <select id="doors" name="doors" required>
+                            <option value="">Selecione...</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5 ou mais</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="persons">Capacidade de Passageiros:</label>
+                        <select id="persons" name="persons" required>
+                            <option value="">Selecione...</option>
+                            <option value="2">2</option>
+                            <option value="4">4</option>
+                            <option value="more">Mais de 5</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lug_boot">Tamanho do Porta-Malas:</label>
+                        <select id="lug_boot" name="lug_boot" required>
+                            <option value="">Selecione...</option>
+                            <option value="small">Pequeno</option>
+                            <option value="med">Médio</option>
+                            <option value="big">Grande</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="safety">Classificação de Segurança:</label>
+                        <select id="safety" name="safety" required>
+                            <option value="">Selecione...</option>
+                            <option value="low">Baixa</option>
+                            <option value="med">Média</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-predict">Fazer Predição</button>
+                </form>
+            </div>
+
+            <div class="result-section" id="resultSection" style="display: none;">
+                <h2>Resultado da Avaliação</h2>
+                <div class="result-card">
+                    <div class="result-main">
+                        <p class="label">Classificação:</p>
+                        <p class="prediction" id="predictionResult">-</p>
+                    </div>
+                    
+                    <div class="probabilities" id="probabilitiesContainer" style="display: none;">
+                        <p class="label">Confiança por Classe:</p>
+                        <div id="probabilitiesList"></div>
+                    </div>
+                </div>
+
+                <button class="btn-new" onclick="resetForm()">Nova Predição</button>
+            </div>
+
+            <div class="error-section" id="errorSection" style="display: none;">
+                <p class="error-message" id="errorMessage">-</p>
+            </div>
+
+            <div class="loading" id="loadingSpinner" style="display: none;">
+                <div class="spinner"></div>
+                <p>Processando...</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Car Evaluation Model API | Desenvolvido com Flask</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
