@@ -5,8 +5,19 @@ const errorSection = document.getElementById('errorSection');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const predictionResult = document.getElementById('predictionResult');
 const errorMessage = document.getElementById('errorMessage');
-const probabilitiesContainer = document.getElementById('probabilitiesContainer');
-const probabilitiesList = document.getElementById('probabilitiesList');
+
+// Mapeamento das classes do modelo para português
+const classMapping = {
+    'unacc': 'Inaceitável',
+    'acc': 'Aceitável',
+    'good': 'Bom',
+    'vgood': 'Muito Bom'
+};
+
+// Função para mapear classe do modelo para português
+function mapClassToPortuguese(className) {
+    return classMapping[className] || className; // Retorna o nome original se não encontrar mapeamento
+}
 
 // Event Listeners
 predictionForm.addEventListener('submit', handleSubmit);
@@ -25,7 +36,7 @@ function getFormData() {
 
 // Função para validar formulário
 function validateForm() {
-    const inputs = predictionForm.querySelectorAll('select');
+    const inputs = predictionForm.querySelectorAll('input, select');
     let isValid = true;
     
     inputs.forEach(input => {
@@ -87,46 +98,13 @@ async function handleSubmit(e) {
 
 // Função para exibir resultado
 function displayResult(result) {
-    // Exibir predição principal
-    predictionResult.textContent = result.prediction;
-    
-    // Exibir probabilidades se disponíveis
-    if (result.probabilities && Object.keys(result.probabilities).length > 0) {
-        displayProbabilities(result.probabilities);
-        probabilitiesContainer.style.display = 'block';
-    } else {
-        probabilitiesContainer.style.display = 'none';
-    }
-    
+    // Exibir predição principal em português
+    predictionResult.textContent = mapClassToPortuguese(result.prediction);
     // Mostrar seção de resultado
     showResult();
 }
-
-// Função para exibir probabilidades
-function displayProbabilities(probabilities) {
-    probabilitiesList.innerHTML = '';
     
-    // Ordenar probabilidades em ordem decrescente
-    const sorted = Object.entries(probabilities)
-        .sort((a, b) => b[1] - a[1]);
     
-    sorted.forEach(([className, probability]) => {
-        const percentage = (probability * 100).toFixed(1);
-        
-        const item = document.createElement('div');
-        item.className = 'probability-item';
-        
-        item.innerHTML = `
-            <span class="probability-class">${className}</span>
-            <div class="probability-bar">
-                <div class="probability-fill" style="width: ${percentage}%"></div>
-            </div>
-            <span class="probability-value">${percentage}%</span>
-        `;
-        
-        probabilitiesList.appendChild(item);
-    });
-}
 
 // Funções auxiliares para mostrar/ocultar elementos
 function showLoading(show) {
@@ -160,19 +138,9 @@ function hideError() {
     errorSection.style.display = 'none';
 }
 
-// Função para resetar formulário
-function resetForm() {
-    predictionForm.reset();
-    hideResult();
-    hideError();
-    
-    // Scroll para o topo
-    document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
-}
-
 // Remover estilos de erro ao mudar de campo
-document.querySelectorAll('select').forEach(select => {
-    select.addEventListener('change', function() {
+document.querySelectorAll('input, select').forEach(element => {
+    element.addEventListener('change', function() {
         if (this.value) {
             this.style.borderColor = '#e0e0e0';
         }

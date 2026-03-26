@@ -13,6 +13,25 @@ CORS(app)
 # Diretório base
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Definição dos nomes das features
+FRONTEND_FEATURES = [
+    'buying_price',  # preço de compra (inteiro)
+    'maint_cost',    # custo de manutenção (inteiro)
+    'doors',         # número de portas (string)
+    'persons',       # capacidade de passageiros (string)
+    'lug_boot_liters',  # capacidade do porta-malas (inteiro)
+    'safety'         # classificação de segurança (string)
+]
+
+MODEL_FEATURES = [
+    'buying',   # preço de compra (categórico)
+    'maint',    # custo de manutenção (categórico)
+    'doors',    # número de portas (categórico)
+    'persons',  # capacidade de passageiros (categórico)
+    'lug_boot', # capacidade do porta-malas (categórico)
+    'safety'    # classificação de segurança (categórico)
+]
+
 # Carregar os modelos e encoders
 try:
     modelo = joblib.load(os.path.join(BASE_DIR, 'modelo_car_evaluation.joblib'))
@@ -50,7 +69,6 @@ def predict():
             return jsonify({'error': 'Modelo não foi carregado corretamente'}), 500
         
         # Preparar os dados para predição
-        # Aqui você precisa ajustar de acordo com os nomes das features do seu modelo
         features = prepare_features(data)
         
         if features is None:
@@ -94,7 +112,8 @@ def model_info():
             'model_name': 'Car Evaluation Model',
             'model_type': type(modelo).__name__ if modelo else 'Unknown',
             'status': 'loaded' if modelo else 'not_loaded',
-            'features': get_feature_names(),
+            'frontend_features': FRONTEND_FEATURES,
+            'model_features': MODEL_FEATURES,
             'classes': list(label_encoder.classes_) if label_encoder else []
         }
         return jsonify(info), 200
@@ -108,25 +127,31 @@ def prepare_features(data):
     IMPORTANTE: Ajuste esta função de acordo com os nomes reais das features do seu modelo
     """
     try:
-        # Exemplo de features esperadas (AJUSTE CONFORME SEU MODELO)
-        feature_names = get_feature_names()
-        
-        # Criar um dicionário com os dados
-        features_dict = {}
-        
-        for feature in feature_names:
-            if feature in data:
-                features_dict[feature] = data[feature]
-            else:
+        # Validar features do frontend
+        for feature in FRONTEND_FEATURES:
+            if feature not in data:
                 return None  # Feature obrigatória faltando
         
-        # Converter para DataFrame
-        df = pd.DataFrame([features_dict])
+        # Criar um dicionário com os dados do frontend
+        features_dict = {feature: data[feature] for feature in FRONTEND_FEATURES}
         
-        # Aplicar transformações se necessário
+        # Criar dicionário para os dados do modelo
+        model_data = {}
+        
+        # Aplicar mapeamentos para campos numéricos e provenientes do frontend
+        map_numerical_to_categorical(features_dict, model_data)
+        
+        # Verificar se todos os features do modelo estão presentes
+        for feature in MODEL_FEATURES:
+            if feature not in model_data:
+                return None
+        
+        # Converter para DataFrame
+        df = pd.DataFrame([model_data])
+        
+        # Aplicar transformações
         if ordinal_encoder:
-            # Aplicar ordinal encoding se necessário
-            # df = pd.DataFrame(ordinal_encoder.transform(df), columns=ordinal_encoder.get_feature_names_out())
+            df = pd.DataFrame(ordinal_encoder.transform(df), columns=ordinal_encoder.get_feature_names_out())
             pass
         
         return df.values
@@ -136,26 +161,50 @@ def prepare_features(data):
         return None
 
 
-def get_feature_names():
+def map_numerical_to_categorical(frontend_data, model_data):
     """
-    Retorna os nomes das features esperadas pelo modelo
-    IMPORTANTE: Atualize isto com os nomes reais do seu modelo
+    Mapeia valores numéricos para categorias categóricas conforme especificado
+    Recebe frontend_data (com valores do frontend) e model_data (para adicionar valores mapeados)
     """
-    # Tente obter do modelo se possível
-    if hasattr(modelo, 'feature_names_in_'):
-        return list(modelo.feature_names_in_)
+    # 1. Mapeamento de Preço de Compra (Buying)
+    if 'buying_price' in frontend_data:
+        buying_price = float(frontend_data['buying_price'])
+        if buying_price >= 300000:
+            model_data['buying'] = 'vhigh'
+        elif buying_price >= 150000:
+            model_data['buying'] = 'high'
+        elif buying_price >= 80000:
+            model_data['buying'] = 'med'
+        else:
+            model_data['buying'] = 'low'
     
-    # Caso contrário, retorne uma lista padrão
-    # AJUSTE CONFORME SEU MODELO
-    return [
-        'buying',
-        'maint',
-        'doors',
-        'persons',
-        'lug_boot',
-        'safety'
-    ]
+    # 2. Mapeamento de Custo de Manutenção Anual (Maint)
+    if 'maint_cost' in frontend_data:
+        maint_cost = float(frontend_data['maint_cost'])
+        if maint_cost >= 25000:
+            model_data['maint'] = 'vhigh'
+        elif maint_cost >= 12000:
+            model_data['maint'] = 'high'
+        elif maint_cost >= 6000:
+            model_data['maint'] = 'med'
+        else:
+            model_data['maint'] = 'low'
 
+    model_data['doors'] = frontend_data.get('doors', '4')
+
+    model_data['persons'] = frontend_data.get('persons', '4')
+    
+    # 3. Mapeamento de Porta-malas (Lug_boot)
+    if 'lug_boot_liters' in frontend_data:
+        lug_boot_liters = float(frontend_data['lug_boot_liters'])
+        if lug_boot_liters >= 450:
+            model_data['lug_boot'] = 'big'
+        elif lug_boot_liters >= 300:
+            model_data['lug_boot'] = 'med'
+        else:
+            model_data['lug_boot'] = 'small'
+
+    model_data['safety'] = frontend_data.get('safety', 'med')
 
 @app.errorhandler(404)
 def not_found(error):
