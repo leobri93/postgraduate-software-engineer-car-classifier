@@ -6,9 +6,7 @@ Uma API Flask que serve um modelo de avaliação de carros pré-treinado atravé
 
 - ✅ API REST com Flask
 - ✅ Interface web responsiva e moderna
-- ✅ Suporte a CORS
 - ✅ Predições em tempo real
-- ✅ Exibição de probabilidades por classe
 - ✅ Validação de entrada
 - ✅ Tratamento de erros
 - ✅ Testes unitários incluídos
@@ -145,13 +143,6 @@ Realiza uma predição com base nos parâmetros fornecidos.
 }
 ```
 
-**Response (Erro 400/500):**
-```json
-{
-  "error": "Mensagem de erro descritiva"
-}
-```
-
 ---
 
 ### GET `/api/model-info`
@@ -169,20 +160,6 @@ Retorna informações sobre o modelo carregado.
 ```
 
 ## ⚙️ Configuração
-
-### Ajustar Features do Modelo
-
-Se seu modelo tiver features diferentes, edite a função `get_feature_names()` em `app.py`:
-
-```python
-def get_feature_names():
-    return [
-        'feature1',
-        'feature2',
-        'feature3',
-        # ... adicione todas as features do seu modelo
-    ]
-```
 
 ### Ativar/Desativar Debug
 
@@ -246,37 +223,6 @@ scikit-learn
 - Certifique-se de que o ambiente virtual está ativado
 - Verifique se todas as dependências foram instaladas: `pip install -r requirements.txt`
 - Os testes requerem que os arquivos `.joblib` estejam presentes
-
-### Modelo retorna predição incorreta
-- Verifique se os valores de entrada correspondem ao esperado pelo modelo
-- Valide os tipos de dados das features (números para preços, strings para categorias)
-- Confirme que os encoders estão sendo aplicados corretamente
-- Os valores numéricos são automaticamente mapeados para categorias
-
-## 📝 Notas Importantes
-
-1. **Validação de Entrada**: A função `prepare_features()` pode ser expandida para incluir validações mais rigorosas
-2. **Transformações**: Se seu modelo requer transformações específicas, adicione-as em `prepare_features()`
-3. **Segurança**: Para produção, configure adequadamente:
-   - CORS com origens específicas
-   - Validação robusta de entrada
-   - Rate limiting
-   - HTTPS
-
-## 🔄 Próximos Passos
-
-Para melhorar a API:
-
-1. **Adicionar autenticação e autorização**
-2. **Implementar caching de predições**
-3. **Adicionar logging detalhado**
-4. **Expandir cobertura de testes unitários**
-5. **Criar testes de integração para a API**
-6. **Containerizar com Docker**
-7. **Deployar em servidor de produção (Heroku, AWS, Azure, etc.)**
-8. **Adicionar documentação OpenAPI automática com flask-openapi3**
-9. **Implementar validação mais robusta de entrada**
-10. **Adicionar métricas de performance e monitoramento**
 
 ## 📄 Licença
 
